@@ -22,7 +22,7 @@ import React, {forwardRef, MutableRefObject, ReactNode, RefObject, useRef} from 
 import {Underlay} from './Underlay';
 import {useViewportSize} from '@react-aria/utils';
 
-interface ModalProps extends AriaModalOverlayProps, StyleProps, OverlayProps {
+interface ModalProps extends AriaModalOverlayProps, StyleProps, Omit<OverlayProps, 'nodeRef'> {
   children: ReactNode,
   state: OverlayTriggerState,
   type?: 'modal' | 'fullscreen' | 'fullscreenTakeover'
@@ -89,7 +89,7 @@ let ModalWrapper = forwardRef(function (props: ModalWrapperProps, ref: RefObject
   };
 
   return (
-    <>
+    <div ref={wrapperRef}>
       <Underlay {...underlayProps} isOpen={isOpen} />
       <div className={wrapperClassName} style={style} ref={wrapperRef}>
         <div
@@ -101,7 +101,7 @@ let ModalWrapper = forwardRef(function (props: ModalWrapperProps, ref: RefObject
           {children}
         </div>
       </div>
-    </>
+    </div>
   );
 });
 

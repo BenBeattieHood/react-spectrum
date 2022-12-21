@@ -22,7 +22,7 @@ import trayStyles from '@adobe/spectrum-css-temp/components/tray/vars.css';
 import {Underlay} from './Underlay';
 import {useViewportSize} from '@react-aria/utils';
 
-interface TrayProps extends AriaModalOverlayProps, StyleProps, OverlayProps {
+interface TrayProps extends AriaModalOverlayProps, StyleProps, Omit<OverlayProps, 'nodeRef'> {
   children: ReactNode,
   state: OverlayTriggerState,
   isFixedHeight?: boolean
@@ -95,7 +95,7 @@ let TrayWrapper = forwardRef(function (props: TrayWrapperProps, ref: RefObject<H
   );
 
   return (
-    <>
+    <div ref={wrapperRef}>
       <Underlay {...underlayProps} isOpen={isOpen} />
       <div className={wrapperClassName} style={wrapperStyle} ref={wrapperRef}>
         <div
@@ -109,7 +109,7 @@ let TrayWrapper = forwardRef(function (props: TrayWrapperProps, ref: RefObject<H
           <DismissButton onDismiss={state.close} />
         </div>
       </div>
-    </>
+    </div>
   );
 });
 
