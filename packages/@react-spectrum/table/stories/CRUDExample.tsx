@@ -24,7 +24,7 @@ import {Form} from '@react-spectrum/form';
 import {Heading} from '@react-spectrum/text';
 import {Item, Menu, MenuTrigger} from '@react-spectrum/menu';
 import More from '@spectrum-icons/workflow/More';
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {TextField} from '@react-spectrum/textfield';
 import {useListData} from '@react-stately/data';
 
@@ -32,7 +32,10 @@ export function CRUDExample() {
   let list = useListData({
     initialItems: [
       {id: 1, firstName: 'Sam', lastName: 'Smith', birthday: 'May 3'},
-      {id: 2, firstName: 'Julia', lastName: 'Jones', birthday: 'February 10'}
+      {id: 2, firstName: 'Julia', lastName: 'Jones', birthday: 'February 10'},
+      {id: 3, firstName: 'Deborah', lastName: 'Donovan', birthday: 'June 15'},
+      {id: 4, firstName: 'Vivian', lastName: 'Van Dyke', birthday: 'April 21'},
+      {id: 5, firstName: 'Boris', lastName: 'Bardok', birthday: 'September 17'}
     ]
   });
 
@@ -43,6 +46,8 @@ export function CRUDExample() {
 
   let selectedCount = list.selectedKeys === 'all' ? list.items.length : list.selectedKeys.size;
 
+  let ref = useRef(null);
+
   return (
     <Flex direction="column">
       <ActionGroup marginBottom={8} onAction={action => setDialog({action})}>
@@ -51,7 +56,7 @@ export function CRUDExample() {
           <Item key="bulk-delete" aria-label="Delete selected items"><Delete /></Item>
         }
       </ActionGroup>
-      <TableView aria-label="People" width={500} height={300} selectionMode="multiple" isQuiet selectedKeys={list.selectedKeys} onSelectionChange={list.setSelectedKeys}>
+      <TableView ref={ref} aria-label="People" width={500} height={300} selectionMode="multiple" isQuiet selectedKeys={list.selectedKeys} onSelectionChange={list.setSelectedKeys}>
         <TableHeader>
           <Column isRowHeader key="firstName">First Name</Column>
           <Column isRowHeader key="lastName">Last Name</Column>
@@ -95,7 +100,12 @@ export function CRUDExample() {
             title="Delete"
             variant="destructive"
             primaryActionLabel="Delete"
-            onPrimaryAction={() => list.remove(dialog.item.id)}>
+            onPrimaryAction={() => {
+              if (ref.current) {
+                ref.current.restoreFocusOnRemove(dialog.item.id);
+              }
+              list.remove(dialog.item.id);
+            }}>
             Are you sure you want to delete {dialog.item.firstName} {dialog.item.lastName}?
           </AlertDialog>
         }

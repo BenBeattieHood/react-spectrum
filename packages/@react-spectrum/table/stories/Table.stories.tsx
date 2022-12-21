@@ -31,7 +31,7 @@ import {Link} from '@react-spectrum/link';
 import {LoadingState, SelectionMode} from '@react-types/shared';
 import NoSearchResults from '@spectrum-icons/illustrations/NoSearchResults';
 import {Radio, RadioGroup} from '@react-spectrum/radio';
-import React, {Key, useState} from 'react';
+import React, {Key, useRef, useState} from 'react';
 import {SearchField} from '@react-spectrum/searchfield';
 import {storiesOf} from '@storybook/react';
 import {Switch} from '@react-spectrum/switch';
@@ -1819,12 +1819,17 @@ export function DeletableRowsTable() {
   let list = useListData({
     initialItems: [
       {id: 1, firstName: 'Sam', lastName: 'Smith', birthday: 'May 3'},
-      {id: 2, firstName: 'Julia', lastName: 'Jones', birthday: 'February 10'}
+      {id: 2, firstName: 'Julia', lastName: 'Jones', birthday: 'February 10'},
+      {id: 3, firstName: 'Deborah', lastName: 'Donovan', birthday: 'June 15'},
+      {id: 4, firstName: 'Vivian', lastName: 'Van Dyke', birthday: 'April 21'},
+      {id: 5, firstName: 'Boris', lastName: 'Bardok', birthday: 'September 17'}
     ]
   });
 
+  let ref = useRef(null);
+
   return (
-    <TableView aria-label="People" width={500} height={300} selectionMode="multiple" isQuiet selectedKeys={list.selectedKeys} onSelectionChange={list.setSelectedKeys}>
+    <TableView ref={ref} aria-label="People" width={500} height={300} selectionMode="multiple" isQuiet selectedKeys={list.selectedKeys} onSelectionChange={list.setSelectedKeys}>
       <TableHeader>
         <Column isRowHeader key="firstName">First Name</Column>
         <Column isRowHeader key="lastName">Last Name</Column>
@@ -1837,7 +1842,13 @@ export function DeletableRowsTable() {
             {column =>
               (<Cell>
                 {column === 'actions'
-                  ? <ActionButton onPress={() => list.remove(item.id)}>Delete</ActionButton>
+                  ? <ActionButton
+                      onPress={() => {
+                        if (ref.current) {
+                          ref.current.restoreFocusOnRemove(item.id);
+                        }
+                        list.remove(item.id);
+                      }}>Delete</ActionButton>
                   : item[column]
                 }
               </Cell>)

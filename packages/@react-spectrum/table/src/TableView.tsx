@@ -23,6 +23,7 @@ import {
   useUnwrapDOMRef
 } from '@react-spectrum/utils';
 import {ColumnSize, SpectrumColumnProps, SpectrumTableProps} from '@react-types/table';
+import {createDOMRef} from '@react-spectrum/utils';
 import {DOMRef, FocusableRef, MoveMoveEvent} from '@react-types/shared';
 import {FocusRing, FocusScope, useFocusRing} from '@react-aria/focus';
 import {getInteractionModality, useHover, usePress} from '@react-aria/interactions';
@@ -33,7 +34,7 @@ import {Item, Menu, MenuTrigger} from '@react-spectrum/menu';
 import {layoutInfoToStyle, ScrollView, setScrollLeft, useVirtualizer, VirtualizerItem} from '@react-aria/virtualizer';
 import {Nubbin} from './Nubbin';
 import {ProgressCircle} from '@react-spectrum/progress';
-import React, {Key, ReactElement, useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
+import React, {Key, ReactElement, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState} from 'react';
 import {Rect, ReusableView, useVirtualizerState} from '@react-stately/virtualizer';
 import {Resizer} from './Resizer';
 import styles from '@adobe/spectrum-css-temp/components/table/vars.css';
@@ -378,6 +379,23 @@ function TableView<T extends object>(props: SpectrumTableProps<T>, ref: DOMRef<H
     setIsResizing(false);
     propsOnResizeEnd?.(widths);
   }, [propsOnResizeEnd, setIsInResizeMode, setIsResizing]);
+
+  useImperativeHandle(ref, () => ({
+    ...createDOMRef(domRef),
+    restoreFocusOnRemove(keyToRemove: React.Key) {
+      const rowToRemove = state.collection.rows.find(row => row.key === keyToRemove);
+      let keyToFocus = rowToRemove.nextKey || rowToRemove.prevKey;
+      if (keyToFocus) {
+        const focusedKey = state.selectionManager.focusedKey;
+        // If focus is within the row
+        if (focusedKey && keyToRemove !== focusedKey) {
+          keyToFocus = `${focusedKey}`.replaceAll(`${keyToRemove}`, `${keyToFocus}`);
+        }
+        state.selectionManager.setFocusedKey(keyToFocus);
+        state.selectionManager.setFocused(true);
+      }
+    }
+  }));
 
   return (
     <TableContext.Provider value={{state, layout, onResizeStart, onResize: props.onResize, onResizeEnd, headerRowHovered, isInResizeMode, setIsInResizeMode, isEmpty, onFocusedResizer, onMoveResizer, headerMenuOpen, setHeaderMenuOpen}}>
